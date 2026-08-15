@@ -98,4 +98,62 @@ public class ShoppingBasketService : IShoppingBasketService
 
         return true;
     }
+
+    public async Task<BasketDto?> AddItemsAsync(Guid basketId, IEnumerable<AddItemRequest> items)
+    {
+        if (basketId == Guid.Empty) return null;
+        if (items == null) return null;
+
+        var existing = await _shoppingBasketRepository.GetAsync(basketId.ToString());
+
+        if (existing == null) return null;
+
+        foreach (var req in items)
+        {
+            if (string.IsNullOrEmpty(req.ProductId) || req.Quantity <= 0) continue;
+
+            var product = await _productCatalog.GetProductAsync(req.ProductId);
+            var unitPrice = product?.Price ?? 0m;
+            var productName = product?.Name ?? string.Empty;
+
+            var existingItem = existing.Items?.FirstOrDefault(i => i.ProductId == req.ProductId);
+
+            if (existingItem != null)
+            {
+                existingItem.Quantity = req.Quantity;
+
+                if (product != null)
+                {
+                    existingItem.UnitPrice = unitPrice;
+                    existingItem.ProductName = productName;
+                }
+            }
+            else
+            {
+                if (existing.Items == null) existing.Items = new List<BasketItem>();
+
+                existing.Items.Add(new BasketItem
+                {
+                    ProductId = req.ProductId,
+                    ProductName = productName,
+                    Quantity = req.Quantity,
+                    UnitPrice = unitPrice
+                });
+            }
+        }
+
+        await _shoppingBasketRepository.SaveAsync(existing);
+
+        return new BasketDto
+        {
+            Id = existing.Id,
+            Items = existing.Items?.Select(i => new BasketItemDto
+            {
+                ProductId = i.ProductId,
+                ProductName = i.ProductName,
+                Quantity = i.Quantity,
+                UnitPrice = i.UnitPrice
+            }).ToList() ?? new List<BasketItemDto>()
+        };
+    }
 }

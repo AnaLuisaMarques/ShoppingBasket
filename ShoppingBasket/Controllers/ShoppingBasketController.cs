@@ -48,4 +48,17 @@ public class ShoppingBasketController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPost("{id:guid}/addProducts")]
+    public async Task<IActionResult> AddItemsToBasket(Guid id, [FromBody] IEnumerable<AddItemRequest> items)
+    {
+        if (id == Guid.Empty) return BadRequest("Invalid id");
+        if (items == null || !items.Any()) return BadRequest("Items payload is required");
+
+        var updated = await _shoppingBasketService.AddItemsAsync(id, items);
+
+        if (updated == null) return NotFound();
+
+        return Ok(updated);
+    }
 }
