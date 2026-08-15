@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="ShoppingBasket.Contracts/ShoppingBasket.Contracts.csproj" Id="ae63e050-7e7a-4d34-99f2-3d724ca9a60e" />
+  <Project Path="ShoppingBasket.Tests/ShoppingBasket.Tests.csproj" Id="28b658ce-bd9f-4d8c-bd61-e9bc12c0584f" />
   <Project Path="ShoppingBasket/ShoppingBasket.API.csproj" />
 </Solution>
