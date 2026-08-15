@@ -16,7 +16,7 @@ public class ShoppingBasketService : IShoppingBasketService
         _shoppingBasketRepository = shoppingBasketRepository;
         _productCatalog = productCatalog;
     }
-
+        
     public async Task<BasketDto?> GetBasketAsync(Guid id)
     {
         _logger.LogInformation("Fetching basket with id {BasketId}", id);
@@ -154,6 +154,57 @@ public class ShoppingBasketService : IShoppingBasketService
                 Quantity = i.Quantity,
                 UnitPrice = i.UnitPrice
             }).ToList() ?? new List<BasketItemDto>()
+        };
+    }
+
+    public async Task<BasketDto?> UpdateItemsAsync(Guid basketId, IEnumerable<AddItemRequest> items)
+    {
+        if (basketId == Guid.Empty) return null;
+        if (items == null) return null;
+
+        var existing = await _shoppingBasketRepository.GetAsync(basketId.ToString());
+
+        if (existing == null) return null;
+
+        foreach (var req in items)
+        {
+            if (string.IsNullOrEmpty(req.ProductId)) continue;
+
+            var existingItem = existing.Items.FirstOrDefault(i => i.ProductId == req.ProductId);
+
+            if (existingItem == null) continue; // only update items that already exist
+
+            if (req.Quantity <= 0)
+            {
+                // remove item
+                existing.Items.Remove(existingItem);
+                continue;
+            }
+
+            // set to requested quantity
+            existingItem.Quantity = req.Quantity;
+
+            var product = await _productCatalog.GetProductAsync(req.ProductId);
+
+            if (product != null)
+            {
+                existingItem.UnitPrice = product.Price;
+                existingItem.ProductName = product.Name;
+            }
+        }
+
+        await _shoppingBasketRepository.SaveAsync(existing);
+
+        return new BasketDto
+        {
+            Id = existing.Id,
+            Items = existing.Items.Select(i => new BasketItemDto
+            {
+                ProductId = i.ProductId,
+                ProductName = i.ProductName,
+                Quantity = i.Quantity,
+                UnitPrice = i.UnitPrice
+            }).ToList()
         };
     }
 }
