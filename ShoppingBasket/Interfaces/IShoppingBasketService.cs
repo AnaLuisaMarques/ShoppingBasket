@@ -5,4 +5,5 @@ using ShoppingBasket.Contracts.DTOs;
 public interface IShoppingBasketService
 {
     Task<BasketDto?> GetBasketAsync(Guid id);
+    Task<BasketDto> CreateBasketAsync(BasketDto basket);
 }

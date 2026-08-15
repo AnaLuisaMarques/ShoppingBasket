@@ -6,7 +6,7 @@ namespace ShoppingBasket.API.Repositories
 
     public class ShoppingBasketRepository : IShoppingBasketRepository
     {
-        private readonly Dictionary<string, Basket> _store = new();
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<string, Basket> _store = new();
 
         public Task<Basket?> GetAsync(string id)
         {
@@ -22,7 +22,7 @@ namespace ShoppingBasket.API.Repositories
 
         public Task DeleteAsync(string id)
         {
-            _store.Remove(id);
+            _store.TryRemove(id, out _);
             return Task.CompletedTask;
         }
     }

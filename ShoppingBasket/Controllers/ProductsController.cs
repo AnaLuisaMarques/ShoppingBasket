@@ -15,7 +15,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> Get(string id)
+    public async Task<IActionResult> GetProductById(string id)
     {
         var product = await _productCatalog.GetProductAsync(id);
 

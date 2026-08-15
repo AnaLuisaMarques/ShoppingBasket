@@ -1,5 +1,6 @@
 using ShoppingBasket.API.Interfaces;
 using ShoppingBasket.Contracts.DTOs;
+using ShoppingBasket.Contracts.Models;  
 
 namespace ShoppingBasket.API.Services;
 
@@ -34,6 +35,48 @@ public class ShoppingBasketService : IShoppingBasketService
         {
             Id = basket.Id,
             Items = basket.Items.Select(i => new BasketItemDto
+            {
+                ProductId = i.ProductId,
+                ProductName = i.ProductName,
+                Quantity = i.Quantity,
+                UnitPrice = i.UnitPrice
+            }).ToList()
+        };
+    }
+
+    public async Task<BasketDto> CreateBasketAsync(BasketDto basket)
+    {
+        if (basket == null) throw new ArgumentNullException(nameof(basket));
+
+        var id = basket.Id == Guid.Empty ? Guid.NewGuid() : basket.Id;
+
+        var model = new Basket
+        {
+            Id = id,
+            Items = new List<BasketItem>()
+        };
+
+        foreach (var item in basket.Items ?? Enumerable.Empty<BasketItemDto>())
+        {
+            var product = await _productCatalog.GetProductAsync(item.ProductId);
+            var unitPrice = product?.Price ?? item.UnitPrice;
+            var productName = product?.Name ?? item.ProductName;
+
+            model.Items.Add(new BasketItem
+            {
+                ProductId = item.ProductId,
+                ProductName = productName,
+                Quantity = item.Quantity,
+                UnitPrice = unitPrice
+            });
+        }
+
+        await _shoppingBasketRepository.SaveAsync(model);
+
+        return new BasketDto
+        {
+            Id = model.Id,
+            Items = model.Items.Select(i => new BasketItemDto
             {
                 ProductId = i.ProductId,
                 ProductName = i.ProductName,

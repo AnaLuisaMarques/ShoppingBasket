@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ShoppingBasket.API.Interfaces;
+using ShoppingBasket.Contracts.DTOs;
 
 namespace ShoppingBasket.API.Controllers;
 
@@ -15,7 +16,7 @@ public class ShoppingBasketController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetShoppingBasketById(Guid id, CancellationToken cancellationToken)
     {
         if (id == Guid.Empty) return BadRequest("Invalid id");
 
@@ -24,5 +25,15 @@ public class ShoppingBasketController : ControllerBase
         if (basket == null) return NotFound();
 
         return Ok(basket);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateShoppingBasket([FromBody] BasketDto basket)
+    {
+        if (basket == null) return BadRequest("Basket payload is required");
+
+        var created = await _shoppingBasketService.CreateBasketAsync(basket);
+
+        return CreatedAtAction(nameof(GetShoppingBasketById), new { id = created.Id }, created);
     }
 }

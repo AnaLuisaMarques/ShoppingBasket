@@ -10,9 +10,10 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 builder.Services.AddScoped<IShoppingBasketService, ShoppingBasketService>();
-builder.Services.AddScoped<IShoppingBasketRepository, ShoppingBasketRepository>();
 
+builder.Services.AddSingleton<IShoppingBasketRepository, ShoppingBasketRepository>();
 builder.Services.AddMemoryCache();
+
 builder.Services.AddHttpClient<IProductCatalogClient, ProductCatalogClient>((sp, client) =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
