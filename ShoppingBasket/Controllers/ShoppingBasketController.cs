@@ -7,11 +7,22 @@ namespace ShoppingBasket.API.Controllers;
 [Route("api/[controller]")]
 public class ShoppingBasketController : ControllerBase
 {
-    private readonly IShoppingBasketService _service;
+    private readonly IShoppingBasketService _shoppingBasketService;
 
     public ShoppingBasketController(IShoppingBasketService service)
     {
-        _service = service;
+        _shoppingBasketService = service;
     }
-        
+
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
+    {
+        if (id == Guid.Empty) return BadRequest("Invalid id");
+
+        var basket = await _shoppingBasketService.GetBasketAsync(id);
+
+        if (basket == null) return NotFound();
+
+        return Ok(basket);
+    }
 }

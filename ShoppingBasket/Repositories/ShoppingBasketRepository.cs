@@ -16,7 +16,7 @@ namespace ShoppingBasket.API.Repositories
 
         public Task SaveAsync(Basket basket)
         {
-            _store[basket.Id] = basket;
+            _store[basket.Id.ToString()] = basket;
             return Task.CompletedTask;
         }
 
