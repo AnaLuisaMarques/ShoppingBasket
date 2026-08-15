@@ -85,4 +85,17 @@ public class ShoppingBasketService : IShoppingBasketService
             }).ToList()
         };
     }
+
+    public async Task<bool> DeleteBasketAsync(Guid id)
+    {
+        if (id == Guid.Empty) return false;
+
+        var existing = await _shoppingBasketRepository.GetAsync(id.ToString());
+
+        if (existing == null) return false;
+
+        await _shoppingBasketRepository.DeleteAsync(id.ToString());
+
+        return true;
+    }
 }

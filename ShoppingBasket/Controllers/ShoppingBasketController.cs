@@ -36,4 +36,16 @@ public class ShoppingBasketController : ControllerBase
 
         return CreatedAtAction(nameof(GetShoppingBasketById), new { id = created.Id }, created);
     }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteShoppingBasket(Guid id)
+    {
+        if (id == Guid.Empty) return BadRequest("Invalid id");
+
+        var deleted = await _shoppingBasketService.DeleteBasketAsync(id);
+
+        if (!deleted) return NotFound();
+
+        return NoContent();
+    }
 }
