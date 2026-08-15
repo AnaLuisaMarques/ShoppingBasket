@@ -24,16 +24,18 @@ public class ProductCatalogClient : IProductCatalogClient
     public async Task<ProductDto?> GetProductAsync(string productId)
     {
         var all = await GetAllProductsCachedAsync();
+
         return all.FirstOrDefault(p => string.Equals(p.Id.ToString(), productId, StringComparison.OrdinalIgnoreCase));
     }
 
     public async Task<IList<ProductDto>> GetTop100ProductsAsync()
     {
         var all = await GetAllProductsCachedAsync();
+
         return all.Take(100).ToList();
     }
 
-    public async Task<(IList<ProductDto> Items, int TotalCount)> GetProductsAsync(int pageNumber, int pageSize)
+    public async Task<(IList<ProductDto> Items, int TotalCount)> GetPagedProductsAsync(int pageNumber, int pageSize)
     {
         var all = await GetAllProductsCachedAsync();
 
@@ -58,6 +60,15 @@ public class ProductCatalogClient : IProductCatalogClient
         }
 
         return (items, total);
+    }
+
+    public async Task<IList<ProductDto>> GetCheapestProductsAsync(int count)
+    {
+        if (count <= 0) return new List<ProductDto>();
+
+        var all = await GetAllProductsCachedAsync();
+        
+        return all.OrderBy(p => p.Price).ThenBy(p => p.Id).Take(count).ToList();
     }
 
     private async Task<List<ProductDto>> GetAllProductsCachedAsync()

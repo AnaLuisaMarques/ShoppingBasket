@@ -18,7 +18,9 @@ public class ProductsController : ControllerBase
     public async Task<IActionResult> Get(string id)
     {
         var product = await _productCatalog.GetProductAsync(id);
+
         if (product == null) return NotFound();
+        
         return Ok(product);
     }
 
@@ -26,17 +28,19 @@ public class ProductsController : ControllerBase
     public async Task<IActionResult> GetTop100Products()
     {
         var products = await _productCatalog.GetTop100ProductsAsync();
+
         return Ok(products);
     }
 
     [HttpGet("paged")]
-    public async Task<IActionResult> GetPaged([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 50)
+    public async Task<IActionResult> GetPagedProducts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 50)
     {
         if (pageNumber < 1) return BadRequest("pageNumber must be >= 1");
         if (pageSize < 1) return BadRequest("pageSize must be >= 1");
         if (pageSize > 1000) return BadRequest("pageSize cannot exceed 1000");
 
-        var (items, totalCount) = await _productCatalog.GetProductsAsync(pageNumber, pageSize);
+        var (items, totalCount) = await _productCatalog.GetPagedProductsAsync(pageNumber, pageSize);
+
         var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
         return Ok(new
@@ -47,5 +51,15 @@ public class ProductsController : ControllerBase
             totalCount,
             totalPages
         });
+    }
+
+    [HttpGet("cheapest")]
+    public async Task<IActionResult> GetCheapestProducts([FromQuery] int number = 10)
+    {
+        if (number < 1) return BadRequest("number must be >= 1");
+
+        var cheapest = await _productCatalog.GetCheapestProductsAsync(number);
+
+        return Ok(cheapest);
     }
 }

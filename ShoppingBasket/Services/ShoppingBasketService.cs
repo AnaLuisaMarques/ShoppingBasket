@@ -1,6 +1,5 @@
 using ShoppingBasket.API.Interfaces;
 using ShoppingBasket.Contracts.DTOs;
-using Microsoft.Extensions.Logging;
 
 namespace ShoppingBasket.API.Services;
 
