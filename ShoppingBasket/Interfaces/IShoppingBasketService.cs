@@ -9,4 +9,5 @@ public interface IShoppingBasketService
     Task<bool> DeleteBasketAsync(Guid id);
     Task<BasketDto?> AddItemsAsync(Guid basketId, IEnumerable<AddItemRequest> items);
     Task<BasketDto?> UpdateItemsAsync(Guid basketId, IEnumerable<AddItemRequest> items);
+    Task<BasketDto?> RemoveItemsAsync(Guid basketId, IEnumerable<DeleteItemRequest> items);
 }

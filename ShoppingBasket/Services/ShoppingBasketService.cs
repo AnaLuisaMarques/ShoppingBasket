@@ -207,4 +207,46 @@ public class ShoppingBasketService : IShoppingBasketService
             }).ToList()
         };
     }
+
+    public async Task<BasketDto?> RemoveItemsAsync(Guid basketId, IEnumerable<DeleteItemRequest> items)
+    {
+        if (basketId == Guid.Empty) return null;
+        if (items == null) return null;
+
+        var existing = await _shoppingBasketRepository.GetAsync(basketId.ToString());
+
+        if (existing == null) return null;
+
+        var idsToRemove = items.Where(i => !string.IsNullOrEmpty(i.ProductId)).Select(i => i.ProductId).ToHashSet();
+
+        if (idsToRemove.Count == 0) 
+            return new BasketDto 
+            { 
+                Id = existing.Id, 
+                Items = existing.Items.Select(i => new BasketItemDto 
+                    { 
+                        ProductId = i.ProductId, 
+                        ProductName = i.ProductName, 
+                        Quantity = i.Quantity, 
+                        UnitPrice = i.UnitPrice 
+                    }
+                ).ToList() 
+            };
+
+        existing.Items.RemoveAll(i => idsToRemove.Contains(i.ProductId));
+
+        await _shoppingBasketRepository.SaveAsync(existing);
+
+        return new BasketDto
+        {
+            Id = existing.Id,
+            Items = existing.Items.Select(i => new BasketItemDto
+            {
+                ProductId = i.ProductId,
+                ProductName = i.ProductName,
+                Quantity = i.Quantity,
+                UnitPrice = i.UnitPrice
+            }).ToList()
+        };
+    }
 }

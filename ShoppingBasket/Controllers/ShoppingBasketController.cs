@@ -74,4 +74,17 @@ public class ShoppingBasketController : ControllerBase
 
         return Ok(updated);
     }
+
+    [HttpDelete("{id:guid}/deleteProducts")]
+    public async Task<IActionResult> RemoveItemsFromBasket(Guid id, [FromBody] IEnumerable<DeleteItemRequest> items)
+    {
+        if (id == Guid.Empty) return BadRequest("Invalid id");
+        if (items == null || !items.Any()) return BadRequest("Items payload is required");
+
+        var updated = await _shoppingBasketService.RemoveItemsAsync(id, items);
+
+        if (updated == null) return NotFound();
+
+        return Ok(updated);
+    }
 }
